@@ -132,7 +132,7 @@ function updatePhysics() {
         p.y += p.vy;
         
         // Invincibility dash check
-        p.isDashingNow = (Date.now() - p.lastDash < 300); // 300ms iframes/dash frames
+        p.isDashingNow = (Date.now() - p.lastDash < 150); // 150ms iframes/dash frames
 
         // Simple arena boundary (bounce or take damage)
         const distFromCenter = Math.sqrt(p.x * p.x + p.y * p.y);
@@ -253,15 +253,20 @@ function updatePhysics() {
 
 // NPC Logic Loop (runs every tick)
 function updateNPCs() {
-    let activePlayers = 0;
+    let humanPlayers = 0;
+    let totalActive = 0;
     let npcsCount = 0;
     
     // Count active entities
     for (const uid in gameState.players) {
         const p = gameState.players[uid];
         if (p.hp > 0 && !p.isSpectator) {
-            activePlayers++;
-            if (p.isNPC) npcsCount++;
+            totalActive++;
+            if (p.isNPC) {
+                npcsCount++;
+            } else {
+                humanPlayers++;
+            }
         }
         
         // --- NPC AI Behaviour ---
@@ -313,12 +318,21 @@ function updateNPCs() {
     }
     
     // NPC Spawning Logic
-    if (activePlayers <= LOW_PLAYER_THRESHOLD) {
-        // If low players for 30s, spawn NPCs
+    if (humanPlayers === 0) {
+        // If no humans, kill all NPCs to save resources
+        for (const uid in gameState.players) {
+            if (gameState.players[uid].isNPC && gameState.players[uid].hp > 0) {
+                gameState.players[uid].hp = 0;
+            }
+        }
+        timeSinceLowPlayers = Date.now();
+    } else if (totalActive <= LOW_PLAYER_THRESHOLD) {
+        // If low players (and at least 1 human) for 30s, spawn NPCs
         if (Date.now() - timeSinceLowPlayers > NPC_ACTIVATION_TIME) {
             // Fill up to 5 total active entities
-            if (activePlayers < 5) {
+            if (totalActive < 5) {
                 spawnNPC();
+                totalActive++; // Predict the increase to prevent massive immediate spawning
             }
         }
     } else {
@@ -327,7 +341,7 @@ function updateNPCs() {
     }
     
     // Extra cleanup: If human players join and we hit MAX_PLAYERS containing NPCs, kill an NPC to make room
-    if (activePlayers >= MAX_PLAYERS && npcsCount > 0) {
+    if (totalActive >= MAX_PLAYERS && npcsCount > 0) {
         for (const uid in gameState.players) {
             if (gameState.players[uid].isNPC && gameState.players[uid].hp > 0) {
                 gameState.players[uid].hp = 0; // instantly kill NPC

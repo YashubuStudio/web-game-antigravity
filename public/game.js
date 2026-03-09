@@ -36,6 +36,10 @@ let dashCooldownEnd = 0;
 // Camera
 let camera = { x: 0, y: 0 };
 
+// Interpolation map for smooth rendering
+let renderState = { players: {} };
+const INTERP_SPEED = 0.3; // Lower value = smoother but more lag behind server
+
 // External Ranking API URl (Make sure this matches your deployed get_ranking.php URL)
 const RANKING_API_URL = 'http://localhost/get_ranking.php';
 
@@ -112,6 +116,22 @@ function connect() {
         gameState = state;
         updateLeaderboard();
         updateHUD();
+        
+        // Initialize render state for new players or hard sync if too far off
+        for (let uid in gameState.players) {
+            const serverP = gameState.players[uid];
+            if (!renderState.players[uid]) {
+                // First time seeing this player, hard sync position
+                renderState.players[uid] = { x: serverP.x, y: serverP.y };
+            } else {
+                // If they teleported or moved too fast (e.g. respawn), hard sync
+                const distSq = Math.pow(serverP.x - renderState.players[uid].x, 2) + Math.pow(serverP.y - renderState.players[uid].y, 2);
+                if (distSq > 100000) { // e.g. >316 pixels jump instantly
+                    renderState.players[uid].x = serverP.x;
+                    renderState.players[uid].y = serverP.y;
+                }
+            }
+        }
     });
 
     socket.on('disconnect', () => {
@@ -263,7 +283,7 @@ setInterval(() => {
     }
 }, 1000 / 30); // 30Hz input rate
 
-function drawShape(ctx, shapeSides, x, y, radius, color, isDashing) {
+function drawShape(ctx, shapeSides, x, y, radius, color, dashState) {
     ctx.beginPath();
     
     if (shapeSides < 3) {
@@ -286,21 +306,35 @@ function drawShape(ctx, shapeSides, x, y, radius, color, isDashing) {
     
     ctx.fillStyle = color;
     
-    // Invincibility dash effect
-    if (isDashing) {
+    // State-based visual changes
+    if (dashState === 'dashing') {
         ctx.shadowBlur = 30;
         ctx.shadowColor = '#ffffff';
         ctx.fillStyle = '#ffffff'; // Flash white
-    } else {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 4;
+        ctx.globalAlpha = 1.0;
+    } else if (dashState === 'cooldown') {
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.4; // Dimmed when on cooldown
+    } else { // ready
         ctx.shadowBlur = 15;
         ctx.shadowColor = color;
+        ctx.fillStyle = color;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 1.0;
     }
     
     ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
     ctx.stroke();
-    ctx.shadowBlur = 0; // Reset
+    
+    // Reset global styles
+    ctx.globalAlpha = 1.0;
+    ctx.shadowBlur = 0; 
 }
 
 function renderMinimap() {
@@ -339,10 +373,23 @@ function renderLoop() {
 
     const me = gameState.players[myId];
     
-    // Update camera to follow player
-    if (me && !me.isSpectator && me.hp > 0) {
-        camera.x += (me.x - camera.x) * 0.1;
-        camera.y += (me.y - camera.y) * 0.1;
+    // Update render state (interpolation)
+    for (let uid in gameState.players) {
+        const serverP = gameState.players[uid];
+        if (!renderState.players[uid]) {
+            // Initialize renderState for new players
+            renderState.players[uid] = { x: serverP.x, y: serverP.y };
+        } else {
+            // Lerp towards server position
+            renderState.players[uid].x += (serverP.x - renderState.players[uid].x) * INTERP_SPEED;
+            renderState.players[uid].y += (serverP.y - renderState.players[uid].y) * INTERP_SPEED;
+        }
+    }
+
+    // Update camera to follow player (using interpolated position for smoothness)
+    if (me && !me.isSpectator && me.hp > 0 && renderState.players[myId]) {
+        camera.x += (renderState.players[myId].x - camera.x) * 0.1;
+        camera.y += (renderState.players[myId].y - camera.y) * 0.1;
     }
 
     ctx.save();
@@ -396,9 +443,14 @@ function renderLoop() {
     // Draw Players
     for (const uid in gameState.players) {
         const p = gameState.players[uid];
+        const rPos = renderState.players[uid] || p; // use interpolated pos if available
         if (p.hp <= 0 || p.isSpectator) continue; // Don't draw dead/spectators
 
-        const isDashing = (Date.now() - p.lastDash < 300);
+        // Dash State Logic
+        const timeSinceDash = Date.now() - p.lastDash;
+        let dashState = 'ready';
+        if (timeSinceDash < 150) dashState = 'dashing';
+        else if (timeSinceDash < 2000) dashState = 'cooldown';
 
         // Calculate shape based on kills
         // 0 kills = circle (shapeSides = 0 mapped in drawShape)
@@ -410,10 +462,10 @@ function renderLoop() {
         else if (p.kills === 4) shapeSides = 4;
         else if (p.kills >= 5) shapeSides = p.kills;
         
-        // Aura if kills >= 1
-        if (p.kills >= 1) {
+        // Aura if kills >= 1 (don't draw if dimmed to reduce clutter)
+        if (p.kills >= 1 && dashState !== 'cooldown') {
             ctx.beginPath();
-            ctx.arc(p.x, p.y, 30 + Math.min(10, p.kills * 2), 0, Math.PI * 2);
+            ctx.arc(rPos.x, rPos.y, 30 + Math.min(10, p.kills * 2), 0, Math.PI * 2);
             ctx.fillStyle = p.color;
             ctx.globalAlpha = 0.2;
             ctx.fill();
@@ -421,26 +473,27 @@ function renderLoop() {
         }
 
         // Draw Player Shape
-        drawShape(ctx, shapeSides, p.x, p.y, 20, p.color, isDashing);
+        drawShape(ctx, shapeSides, rPos.x, rPos.y, 20, p.color, dashState);
 
         // Draw Crown if Top Player
         if (uid === topPlayerId && maxKills > 0) {
             ctx.font = '24px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('👑', p.x, p.y - 45);
+            ctx.fillText('👑', rPos.x, rPos.y - 45);
         }
 
-        // Draw Name & HP Bar
+        // Draw Name & HP Number
         ctx.fillStyle = 'white';
         ctx.font = '14px Orbitron';
         ctx.textAlign = 'center';
-        ctx.fillText(p.name, p.x, p.y - 25);
+        ctx.fillText(`${p.name} (HP: ${Math.round(p.hp)})`, rPos.x, rPos.y - 25);
         
-        const hpPercent = p.hp / 100;
+        // Draw HP Bar
+        const hpPercent = Math.max(0, p.hp / 100);
         ctx.fillStyle = 'red';
-        ctx.fillRect(p.x - 20, p.y + 25, 40, 5);
+        ctx.fillRect(rPos.x - 20, rPos.y + 25, 40, 5);
         ctx.fillStyle = '#00ff00';
-        ctx.fillRect(p.x - 20, p.y + 25, 40 * hpPercent, 5);
+        ctx.fillRect(rPos.x - 20, rPos.y + 25, 40 * hpPercent, 5);
     }
 
     ctx.restore();
