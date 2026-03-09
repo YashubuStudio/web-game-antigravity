@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Bumper</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="ui-layer">
+        <div id="start-screen">
+            <h1>NEON<br><span class="highlight">BUMPER</span></h1>
+            <p>マウスカーソルで移動、クリックでダッシュ！<br>他のプレイヤーを外側に押し出せ！</p>
+            <input type="text" id="player-name" placeholder="プレイヤー名" maxlength="10">
+            <button id="start-btn">GAME START</button>
+        </div>
+        <div id="game-ui" style="display: none;">
+            <div id="leaderboard"></div>
+            <div id="status-message"></div>
+        </div>
+    </div>
+    <canvas id="game-canvas"></canvas>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

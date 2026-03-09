@@ -1,0 +1,170 @@
+:root {
+    --bg-color: #050505;
+    --text-color: #ffffff;
+    --primary-glow: rgba(0, 255, 255, 0.8);
+    --secondary-glow: rgba(255, 0, 255, 0.8);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body, html {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    font-family: 'Orbitron', sans-serif;
+    color: var(--text-color);
+    user-select: none;
+}
+
+#game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none; /* Let clicks pass through to canvas when playing */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#start-screen {
+    background: rgba(10, 10, 15, 0.9);
+    padding: 40px;
+    border-radius: 15px;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.2), inset 0 0 20px rgba(255, 0, 255, 0.1);
+    text-align: center;
+    pointer-events: auto; /* Re-enable pointer events for UI */
+    backdrop-filter: blur(5px);
+    transition: opacity 0.3s ease;
+}
+
+#start-screen h1 {
+    font-size: 3rem;
+    margin-bottom: 5px;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.highlight {
+    color: #ff00ff;
+    text-shadow: 0 0 10px var(--secondary-glow);
+}
+
+#start-screen p {
+    font-size: 1rem;
+    margin-bottom: 30px;
+    color: #aaaaaa;
+}
+
+input[type="text"] {
+    width: 80%;
+    padding: 12px;
+    margin-bottom: 20px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(0, 255, 255, 0.5);
+    color: white;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.2rem;
+    text-align: center;
+    border-radius: 5px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #00ffff;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+button {
+    background: transparent;
+    color: #00ffff;
+    border: 2px solid #00ffff;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+button:hover {
+    background: #00ffff;
+    color: #000;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.6), inset 0 0 20px rgba(0, 255, 255, 0.6);
+}
+
+button:active {
+    transform: scale(0.95);
+}
+
+#game-ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+#leaderboard {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.5);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    min-width: 200px;
+}
+
+#leaderboard h3 {
+    margin-bottom: 10px;
+    color: #00ffff;
+    text-align: center;
+    border-bottom: 1px solid rgba(0,255,255,0.3);
+    padding-bottom: 5px;
+}
+
+.player-score {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+#status-message {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: #ff00ff;
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
+    font-weight: bold;
+    text-align: center;
+}
