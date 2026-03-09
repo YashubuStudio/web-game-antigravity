@@ -64,6 +64,15 @@ function fetchGlobalRanking() {
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+
+    if (minimapCanvas) {
+        const rect = minimapCanvas.getBoundingClientRect();
+        const size = Math.floor(Math.min(rect.width, rect.height));
+        if (size > 0) {
+            minimapCanvas.width = size;
+            minimapCanvas.height = size;
+        }
+    }
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
@@ -343,12 +352,15 @@ function renderMinimap() {
     // Clear minimizing map
     minimapCtx.clearRect(0, 0, minimapCanvas.width, minimapCanvas.height);
     
-    const scale = minimapCanvas.width / (arenaRadius * 2);
-    const center = minimapCanvas.width / 2;
+    const mapSize = Math.min(minimapCanvas.width, minimapCanvas.height);
+    const scale = mapSize / (arenaRadius * 2);
+    const centerX = minimapCanvas.width / 2;
+    const centerY = minimapCanvas.height / 2;
+    const mapRadius = (mapSize / 2) - 2;
     
     // Draw arena bounds
     minimapCtx.beginPath();
-    minimapCtx.arc(center, center, center - 2, 0, Math.PI*2);
+    minimapCtx.arc(centerX, centerY, mapRadius, 0, Math.PI*2);
     minimapCtx.strokeStyle = 'rgba(255, 0, 255, 0.5)';
     minimapCtx.stroke();
     
@@ -357,8 +369,8 @@ function renderMinimap() {
         const p = gameState.players[uid];
         if (p.hp <= 0 || p.isSpectator) continue;
         
-        const mx = center + (p.x * scale);
-        const my = center + (p.y * scale);
+        const mx = centerX + (p.x * scale);
+        const my = centerY + (p.y * scale);
         
         minimapCtx.beginPath();
         minimapCtx.arc(mx, my, uid === myId ? 4 : 3, 0, Math.PI * 2);
