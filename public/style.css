@@ -21,6 +21,8 @@ body, html {
     font-family: 'Orbitron', sans-serif;
     color: var(--text-color);
     user-select: none;
+    -webkit-user-select: none;
+    touch-action: none; /* Prevent browser defaults on canvas swipe */
 }
 
 #game-canvas {
@@ -76,10 +78,17 @@ body, html {
     color: #aaaaaa;
 }
 
-input[type="text"] {
-    width: 80%;
-    padding: 12px;
+.input-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 20px;
+}
+
+input[type="text"] {
+    width: 60%;
+    padding: 12px;
     background: rgba(0,0,0,0.5);
     border: 1px solid rgba(0, 255, 255, 0.5);
     color: white;
@@ -89,6 +98,25 @@ input[type="text"] {
     border-radius: 5px;
     outline: none;
     transition: all 0.3s ease;
+}
+
+input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    border: 1px solid rgba(0, 255, 255, 0.5);
+    width: 48px;
+    height: 48px;
+    border-radius: 5px;
+    padding: 0;
+    cursor: pointer;
+    background: rgba(0,0,0,0.5);
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 3px;
 }
 
 input[type="text"]:focus {
@@ -131,10 +159,16 @@ button:active {
     pointer-events: none;
 }
 
-#leaderboard {
+#top-left-panel {
     position: absolute;
     top: 20px;
-    right: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#global-ranking, #leaderboard {
     background: rgba(0,0,0,0.5);
     padding: 15px;
     border-radius: 8px;
@@ -142,12 +176,24 @@ button:active {
     min-width: 200px;
 }
 
-#leaderboard h3 {
+#global-ranking h4, #leaderboard h4 {
     margin-bottom: 10px;
     color: #00ffff;
     text-align: center;
     border-bottom: 1px solid rgba(0,255,255,0.3);
     padding-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+ul#global-ranking-list {
+    list-style: none;
+    font-size: 0.8rem;
+    color: #ccc;
+}
+ul#global-ranking-list li {
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .player-score {
@@ -159,7 +205,7 @@ button:active {
 
 #status-message {
     position: absolute;
-    bottom: 30px;
+    bottom: 80px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 1.5rem;
@@ -167,4 +213,125 @@ button:active {
     text-shadow: 0 0 10px rgba(255, 0, 255, 0.8);
     font-weight: bold;
     text-align: center;
+}
+
+#bottom-right-panel {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+}
+
+#cooldown-display {
+    font-size: 1.5rem;
+    color: #00ffff;
+    background: rgba(0,0,0,0.6);
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,255,255,0.3);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+}
+
+#death-screen {
+    background: rgba(15, 5, 10, 0.95);
+    padding: 50px;
+    border-radius: 15px;
+    border: 2px solid #ff00ff;
+    box-shadow: 0 0 50px rgba(255, 0, 0, 0.3), inset 0 0 20px rgba(255, 0, 255, 0.2);
+    text-align: center;
+    pointer-events: auto; /* Re-enable pointer events for UI */
+    backdrop-filter: blur(8px);
+    z-index: 20; /* above ui-layer */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+#death-screen h2 {
+    color: red;
+    font-size: 4rem;
+    text-shadow: 0 0 20px red;
+    margin-bottom: 10px;
+}
+
+#minimap-canvas {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 200px;
+    height: 200px;
+    border: 1px solid rgba(0,255,255,0.3);
+    background: rgba(0,0,0,0.3);
+    border-radius: 5px;
+    z-index: 15;
+    pointer-events: none;
+}
+
+/* Mobile Responsive */
+@media screen and (max-width: 768px) {
+    #start-screen {
+        width: 90%;
+        padding: 20px;
+    }
+    #start-screen h1 {
+        font-size: 2rem;
+    }
+    input[type="text"] {
+        width: 70%;
+        font-size: 1rem;
+    }
+    button {
+        padding: 10px 20px;
+        font-size: 1rem;
+        width: 100%;
+    }
+    
+    #top-left-panel {
+        top: 10px;
+        left: 10px;
+        gap: 8px;
+    }
+    #global-ranking, #leaderboard {
+        padding: 8px;
+        min-width: 150px;
+    }
+    #global-ranking h4, #leaderboard h4 {
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+    }
+    .player-score {
+        font-size: 0.75rem;
+    }
+    ul#global-ranking-list {
+        font-size: 0.7rem;
+    }
+    
+    #minimap-canvas {
+        top: 10px;
+        right: 10px;
+        width: 120px;
+        height: 120px;
+    }
+    
+    #bottom-right-panel {
+        bottom: 20px;
+        right: 20px;
+    }
+    #cooldown-display {
+        font-size: 1rem;
+        padding: 5px 10px;
+    }
+    
+    #status-message {
+        bottom: 60px;
+        font-size: 1.2rem;
+        width: 90%;
+    }
+    
+    #death-screen {
+        width: 90%;
+        padding: 30px 20px;
+    }
+    #death-screen h2 {
+        font-size: 2.5rem;
+    }
 }

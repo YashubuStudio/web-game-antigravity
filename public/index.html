@@ -12,14 +12,49 @@
         <div id="start-screen">
             <h1>NEON<br><span class="highlight">BUMPER</span></h1>
             <p>マウスカーソルで移動、クリックでダッシュ！<br>他のプレイヤーを外側に押し出せ！</p>
-            <input type="text" id="player-name" placeholder="プレイヤー名" maxlength="10">
+            <div class="input-group">
+                <input type="text" id="player-name" placeholder="プレイヤー名" maxlength="10">
+                <input type="color" id="player-color" value="#00ffff" title="マイカラー">
+            </div>
+            
+            <div id="lobby-info" style="margin-bottom: 20px; font-size: 0.9rem; color: #00ffff;">
+                現在プレイ中: <span id="lobby-active">-</span>/<span id="lobby-max">-</span>人  |  待機中(観戦): <span id="lobby-spectator">-</span>人
+            </div>
+            
             <button id="start-btn">GAME START</button>
+            <div id="spectator-msg" style="display:none; color: #ff5555; margin-top: 10px;">満員のため観戦モードになります</div>
         </div>
+        
+        <!-- Death Screen / Respawn -->
+        <div id="death-screen" style="display: none;">
+            <h2 id="death-title">YOU DIED</h2>
+            <p id="death-killer" style="color: #ff00ff; margin-bottom: 20px;"></p>
+            <p id="respawn-timer">リスポーンまで: <span>5</span>秒</p>
+            <button id="respawn-btn" style="display:none; margin-top: 20px;">RE-SPAWN (再参加)</button>
+        </div>
+
         <div id="game-ui" style="display: none;">
-            <div id="leaderboard"></div>
+            <div id="top-left-panel">
+                <div id="global-ranking">
+                    <h4>GLOBAL TOP RANKING</h4>
+                    <ul id="global-ranking-list"><li>Loading...</li></ul>
+                </div>
+                <div id="leaderboard">
+                    <h4>CURRENT MATCH</h4>
+                    <div id="match-leaderboard-content"></div>
+                </div>
+            </div>
+            
             <div id="status-message"></div>
+            
+            <div id="bottom-right-panel">
+                <div id="cooldown-display">DASH: <span>0.0s</span></div>
+            </div>
         </div>
     </div>
+    
+    <!-- Mini Map overlay (Canvas on top) -->
+    <canvas id="minimap-canvas"></canvas>
     <canvas id="game-canvas"></canvas>
 
     <script src="/socket.io/socket.io.js"></script>
