@@ -11,6 +11,7 @@ const io = new Server(server);
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 // Game State
 const gameState = {
@@ -185,6 +186,7 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+    console.log(`LAN access: http://${HOST === '0.0.0.0' ? '<<your-local-ip>>' : HOST}:${PORT}`);
 });
