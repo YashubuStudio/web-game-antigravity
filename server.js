@@ -19,7 +19,7 @@ const gameState = {
 };
 
 // Physics constants
-const ARENA_RADIUS = 1700; // Expanded by 1.7x
+const ARENA_RADIUS = 1360; // 10人対戦向けに約0.8xへ調整
 const TICK_RATE = 1000 / 30; // 30 FPS / 30 Hz
 const PLAYER_RADIUS = 20;
 const MAX_SPEED = 10;
@@ -27,6 +27,7 @@ const ACCELERATION = 0.5;
 const FRICTION = 0.95;
 const DASH_POWER = 25;
 const DASH_COOLDOWN = 2000; // ms
+const DASH_ATTACK_WINDOW = 250; // ms
 const MAX_PLAYERS = 10;
 const RESPAWN_TIME = 5000; // 5 seconds
 // PHP server endpoint for score saving (to be configured by user)
@@ -132,7 +133,7 @@ function updatePhysics() {
         p.y += p.vy;
         
         // Invincibility dash check
-        p.isDashingNow = (Date.now() - p.lastDash < 150); // 150ms iframes/dash frames
+        p.isDashingNow = (Date.now() - p.lastDash < DASH_ATTACK_WINDOW);
 
         // Simple arena boundary (bounce or take damage)
         const distFromCenter = Math.sqrt(p.x * p.x + p.y * p.y);
