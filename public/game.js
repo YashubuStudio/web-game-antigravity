@@ -461,7 +461,7 @@ function renderLoop() {
         // Dash State Logic
         const timeSinceDash = Date.now() - p.lastDash;
         let dashState = 'ready';
-        if (timeSinceDash < 150) dashState = 'dashing';
+        if (timeSinceDash < 250) dashState = 'dashing';
         else if (timeSinceDash < 2000) dashState = 'cooldown';
 
         // Calculate shape based on kills

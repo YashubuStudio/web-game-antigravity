@@ -335,3 +335,25 @@ ul#global-ranking-list li {
         font-size: 2.5rem;
     }
 }
+
+
+#waiting-ad-slot {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px dashed rgba(255, 255, 255, 0.35);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+#waiting-ad-slot .ad-label {
+    color: #00ffff;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+}
+
+#waiting-ad-slot .ad-copy {
+    color: #d0d0d0;
+    font-size: 0.85rem;
+    margin: 0;
+}

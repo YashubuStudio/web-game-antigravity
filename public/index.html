@@ -11,7 +11,7 @@
     <div id="ui-layer">
         <div id="start-screen">
             <h1>NEON<br><span class="highlight">BUMPER</span></h1>
-            <p>マウスカーソルで移動、クリックでダッシュ！<br>他のプレイヤーを外側に押し出せ！</p>
+            <p>マウスカーソルで位置取りし、クリックでダッシュ斬り！<br>近接の差し合いを制して、相手のHPを削りきろう。</p>
             <div class="input-group">
                 <input type="text" id="player-name" placeholder="プレイヤー名" maxlength="10">
                 <input type="color" id="player-color" value="#00ffff" title="マイカラー">
@@ -22,6 +22,11 @@
             </div>
             
             <button id="start-btn">GAME START</button>
+            <div id="waiting-ad-slot" aria-label="広告枠">
+                <p class="ad-label">AD SPACE</p>
+                <p class="ad-copy">待機画面用の広告をここに配置できます</p>
+            </div>
+
             <div id="spectator-msg" style="display:none; color: #ff5555; margin-top: 10px;">満員のため観戦モードになります</div>
         </div>
         
